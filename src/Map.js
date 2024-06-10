@@ -3,31 +3,32 @@ import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import countriesData from './countries.json';
 
-const Map = ({ targetCountry, onCountrySelected, selectedCountry }) => {
+const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated }) => {
 	const [hovered, setHovered] = useState(null);
-	const [selected, setSelected] = useState(null);
 
 	const handleCountryClick = (e) => {
-		const countryName = e.target.feature.properties.ADMIN;
-		onCountrySelected(countryName);
-		setSelected(countryName);
-		setHovered(null); // Clear hover when a country is selected
+		if (!isValidated) {
+			const countryName = e.target.feature.properties.ADMIN;
+			onCountrySelected(countryName);
+		}
 	};
 
 	const handleCountryMouseOver = (e) => {
-		const countryName = e.target.feature.properties.ADMIN;
-		if (selected !== countryName) {
+		if (!isValidated) {
+			const countryName = e.target.feature.properties.ADMIN;
 			setHovered(countryName);
 		}
 	};
 
 	const handleCountryMouseOut = (e) => {
-		setHovered(null);
+		if (!isValidated) {
+			setHovered(null);
+		}
 	};
 
 	const style = {
 		fillColor: 'white',
-		weight: 0.1, // Adjusted weight to make the borders finer
+		weight: 0.2, // Adjusted weight to make the borders finer
 		color: 'black',
 	};
 
@@ -43,6 +44,18 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry }) => {
 		color: 'black',
 	};
 
+	const wrongGuessStyle = {
+		fillColor: isBlinking ? 'red' : 'white', // Set to pure red without opacity
+		weight: 1,
+		color: 'black',
+	};
+
+	const correctGuessStyle = {
+		fillColor: isBlinking ? 'green' : 'white', // Set to pure green without opacity
+		weight: 1,
+		color: 'black',
+	};
+
 	return (
 		<MapContainer center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }}>
 			<TileLayer
@@ -52,7 +65,11 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry }) => {
 			<GeoJSON
 				data={countriesData}
 				style={(feature) => {
-					if (feature.properties.ADMIN === selected) {
+					if (feature.properties.ADMIN === correctGuess) {
+						return correctGuessStyle;
+					} else if (feature.properties.ADMIN === wrongGuess) {
+						return wrongGuessStyle;
+					} else if (feature.properties.ADMIN === selectedCountry) {
 						return highlightStyle;
 					} else if (feature.properties.ADMIN === hovered) {
 						return hoverStyle;
@@ -66,6 +83,11 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry }) => {
 						mouseover: handleCountryMouseOver,
 						mouseout: handleCountryMouseOut,
 					});
+					if (isValidated) {
+						layer.off('click');
+						layer.off('mouseover');
+						layer.off('mouseout');
+					}
 				}}
 			/>
 		</MapContainer>
