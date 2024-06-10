@@ -32,15 +32,18 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen p-4">
-      <h1 className="text-2xl font-bold mb-4">Find the Country</h1>
-      <div className="w-3/4 h-1/2 mb-4">
-        <Map targetCountry={targetCountry} onCountrySelected={handleCountrySelected} selectedCountry={selectedCountry} />
+      <div className="flex flex-col items-center justify-center h-screen p-4">
+        {targetCountry && (
+            <p className="text-2xl font-bold mb-4">
+              Find the Country: <span className="font-bold">{translations[targetCountry]}</span>
+            </p>
+        )}
+        <div className="w-3/4 h-1/2 mb-4">
+          <Map targetCountry={targetCountry} onCountrySelected={handleCountrySelected} selectedCountry={selectedCountry} />
+        </div>
+        <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={validateSelection}>Validate</button>
+        <p className="mt-4">{result}</p>
       </div>
-      <div className="text-lg mb-2">Find the Country: <span className="font-bold">{translations[targetCountry]}</span></div>
-      <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={validateSelection}>Validate</button>
-      <p className="mt-4">{result}</p>
-    </div>
   );
 }
 

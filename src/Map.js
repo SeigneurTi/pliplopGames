@@ -1,64 +1,46 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import countriesData from './countries.json';
 import translations from './translations.json';
 
 const Map = ({ targetCountry, onCountrySelected, selectedCountry }) => {
-	const onEachCountry = (country, layer) => {
-		const countryName = country.properties.ADMIN;
+	const [selected, setSelected] = useState(null);
 
-		layer.on({
-			mouseover: (e) => {
-				e.target.setStyle({
-					weight: 2,
-					color: '#666',
-					fillOpacity: 0.7
-				});
-			},
-			mouseout: (e) => {
-				if (selectedCountry !== countryName) {
-					e.target.setStyle({
-						weight: 1,
-						color: '#3388ff',
-						fillOpacity: 0.2
-					});
-				}
-			},
-			click: (e) => {
-				onCountrySelected(countryName);
-				e.target.setStyle({
-					weight: 2,
-					color: '#ff7800',
-					fillOpacity: 0.7
-				});
-			}
-		});
+	const handleCountryClick = (e) => {
+		const countryName = e.target.feature.properties.ADMIN;
+		onCountrySelected(countryName);
+		setSelected(countryName);
+	}
 
-		if (selectedCountry === countryName) {
-			layer.setStyle({
-				weight: 2,
-				color: '#ff7800',
-				fillOpacity: 0.7
-			});
-		} else {
-			layer.setStyle({
-				weight: 1,
-				color: '#3388ff',
-				fillOpacity: 0.2
-			});
-		}
+	const style = {
+		fillColor: 'white',
+		weight: 1,
+		color: 'black',
+
+	};
+
+	const highlightStyle = {
+		fillColor: 'yellow',
+		weight: 2,
+		color: 'black',
 	};
 
 	return (
 		<MapContainer center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }}>
-			<TileLayer
-				url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-				attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+			<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+			<GeoJSON
+				data={countriesData}
+				style={feature => feature.properties.ADMIN === selected ? highlightStyle : style}
+				onEachFeature={(feature, layer) => {
+					layer.on({
+						click: handleCountryClick
+					});
+				}}
 			/>
-			<GeoJSON data={countriesData} onEachFeature={onEachCountry} />
 		</MapContainer>
 	);
+
 };
 
 export default Map;
