@@ -1,7 +1,8 @@
 import React from 'react';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import countriesData from './countries.json'; // Assure-toi que ce fichier existe
+import countriesData from './countries.json';
+import translations from './translations.json';
 
 const Map = ({ targetCountry, onCountrySelected, selectedCountry }) => {
 	const onEachCountry = (country, layer) => {
