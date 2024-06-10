@@ -68,8 +68,8 @@ function App() {
   return (
     <div className="flex flex-col items-center justify-center h-screen p-4">
       <h1 className="text-2xl font-bold mb-4">Find the Country</h1>
-      <div className="w-3/4 h-3/4 mb-4"> {/* Ajustez la hauteur ici */}
-        <Map targetCountry={targetCountry} onCountrySelected={handleCountrySelected} selectedCountry={selectedCountry} wrongGuess={wrongGuess} correctGuess={correctGuess} isBlinking={isBlinking} />
+      <div className="w-3/4 h-3/4 mb-4 flex justify-center items-center"> {/* Ajustez la hauteur ici */}
+        <Map targetCountry={targetCountry} onCountrySelected={handleCountrySelected} selectedCountry={selectedCountry} wrongGuess={wrongGuess} correctGuess={correctGuess} isBlinking={isBlinking} isValidated={isValidated} />
       </div>
       <div className="text-lg mb-2">Find the Country: <span className="font-bold">{getCountryNameInFrench(targetCountry)}</span></div>
       <button className="bg-blue-500 text-white px-4 py-2 rounded mb-2" onClick={validateSelection} disabled={isValidated}>Validate</button>

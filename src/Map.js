@@ -1,96 +1,71 @@
-import React, { useState } from 'react';
-import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+import React, { useRef, useEffect } from 'react';
+import * as d3 from 'd3';
+import rd3 from 'react-d3-library';
 import countriesData from './countries.json';
 
+const RD3Component = rd3.Component;
+
 const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated }) => {
-	const [hovered, setHovered] = useState(null);
+	const svgRef = useRef(null);
+	const d3Node = useRef(null);
 
-	const handleCountryClick = (e) => {
-		if (!isValidated) {
-			const countryName = e.target.feature.properties.ADMIN;
-			onCountrySelected(countryName);
+	useEffect(() => {
+		const width = 800;
+		const height = 400;
+
+		const svg = d3.select(svgRef.current)
+			.attr("width", width)
+			.attr("height", height);
+
+		const projection = d3.geoMercator().scale(130).translate([width / 2, height / 1.5]);
+		const path = d3.geoPath().projection(projection);
+
+		svg.selectAll("*").remove(); // Clear previous drawings
+
+		svg.selectAll("path")
+			.data(countriesData.features)
+			.enter()
+			.append("path")
+			.attr("d", path)
+			.attr("fill", d => getFillColor(d.properties.ADMIN))
+			.attr("stroke", "black")
+			.attr("stroke-width", 0.5)
+			.on("click", (event, d) => {
+				if (!isValidated) {
+					onCountrySelected(d.properties.ADMIN);
+				}
+			})
+			.on("mouseover", (event, d) => {
+				if (!isValidated) {
+					d3.select(event.target).attr("fill", "lightblue");
+				}
+			})
+			.on("mouseout", (event, d) => {
+				if (!isValidated) {
+					d3.select(event.target).attr("fill", getFillColor(d.properties.ADMIN));
+				}
+			});
+
+		d3Node.current = svg.node();
+	}, [targetCountry, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated]);
+
+	const getFillColor = (countryName) => {
+		if (correctGuess === countryName) {
+			return isBlinking ? 'green' : 'white';
+		} else if (wrongGuess === countryName) {
+			return isBlinking ? 'red' : 'white';
+		} else if (selectedCountry === countryName) {
+			return 'yellow';
+		} else {
+			return 'white';
 		}
-	};
-
-	const handleCountryMouseOver = (e) => {
-		if (!isValidated) {
-			const countryName = e.target.feature.properties.ADMIN;
-			setHovered(countryName);
-		}
-	};
-
-	const handleCountryMouseOut = (e) => {
-		if (!isValidated) {
-			setHovered(null);
-		}
-	};
-
-	const style = {
-		fillColor: 'white',
-		weight: 0.2, // Adjusted weight to make the borders finer
-		color: 'black',
-	};
-
-	const highlightStyle = {
-		fillColor: 'yellow',
-		weight: 1, // Adjusted weight for selected country
-		color: 'black',
-	};
-
-	const hoverStyle = {
-		fillColor: 'lightblue',
-		weight: 1, // Adjusted weight for hovered country
-		color: 'black',
-	};
-
-	const wrongGuessStyle = {
-		fillColor: isBlinking ? 'red' : 'white', // Set to pure red without opacity
-		weight: 1,
-		color: 'black',
-	};
-
-	const correctGuessStyle = {
-		fillColor: isBlinking ? 'green' : 'white', // Set to pure green without opacity
-		weight: 1,
-		color: 'black',
 	};
 
 	return (
-		<MapContainer center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }}>
-			<TileLayer
-				url="https://api.maptiler.com/maps/landscape/256/{z}/{x}/{y}.png?key=A5FKOaq6mxWDrS8TC6Fd"
-				attribution='&copy; <a href="https://www.maptiler.com/">MapTiler</a> &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-			/>
-			<GeoJSON
-				data={countriesData}
-				style={(feature) => {
-					if (feature.properties.ADMIN === correctGuess) {
-						return correctGuessStyle;
-					} else if (feature.properties.ADMIN === wrongGuess) {
-						return wrongGuessStyle;
-					} else if (feature.properties.ADMIN === selectedCountry) {
-						return highlightStyle;
-					} else if (feature.properties.ADMIN === hovered) {
-						return hoverStyle;
-					} else {
-						return style;
-					}
-				}}
-				onEachFeature={(feature, layer) => {
-					layer.on({
-						click: handleCountryClick,
-						mouseover: handleCountryMouseOver,
-						mouseout: handleCountryMouseOut,
-					});
-					if (isValidated) {
-						layer.off('click');
-						layer.off('mouseover');
-						layer.off('mouseout');
-					}
-				}}
-			/>
-		</MapContainer>
+		<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+			<svg ref={svgRef}></svg>
+			{d3Node.current && <RD3Component data={d3Node.current} />}
+		</div>
 	);
 };
 
