@@ -1,13 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
-import rd3 from 'react-d3-library';
 import countriesData from './countries.json';
-
-const RD3Component = rd3.Component;
 
 const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated }) => {
 	const svgRef = useRef(null);
-	const d3Node = useRef(null);
 
 	useEffect(() => {
 		const width = 800;
@@ -46,7 +42,6 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 				}
 			});
 
-		d3Node.current = svg.node();
 	}, [targetCountry, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated]);
 
 	const getFillColor = (countryName) => {
@@ -64,7 +59,6 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 	return (
 		<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
 			<svg ref={svgRef}></svg>
-			{d3Node.current && <RD3Component data={d3Node.current} />}
 		</div>
 	);
 };
