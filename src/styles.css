@@ -1,3 +1,23 @@
 .leaflet-label {
     display: none !important;
 }
+
+.text-white {
+    color: white;
+}
+
+.bg-blue-500 {
+    background-color: #4299e1;
+}
+
+.bg-gray-500 {
+    background-color: #a0aec0;
+}
+
+button {
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    filter: brightness(90%);
+}
