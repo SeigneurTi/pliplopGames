@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import * as d3 from 'd3';
 import './styles.css'; // Assurez-vous d'importer votre CSS
 
@@ -16,6 +16,46 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 			setCountriesData(data);
 		});
 	}, []);
+
+	const getFillColor = useCallback((countryName) => {
+		if (correctGuess === countryName) {
+			return isBlinking ? 'green' : 'white';
+		} else if (wrongGuess === countryName) {
+			return isBlinking ? 'red' : 'white';
+		} else if (selectedCountry === countryName) {
+			return 'yellow';
+		} else {
+			return 'white';
+		}
+	}, [correctGuess, wrongGuess, selectedCountry, isBlinking]);
+
+	const rotateLeft = () => {
+		const rotate = projectionRef.current.rotate();
+		const newRotation = [rotate[0] - 10, rotate[1]];
+		projectionRef.current.rotate(newRotation);
+		setRotation(newRotation);
+	};
+
+	const rotateRight = () => {
+		const rotate = projectionRef.current.rotate();
+		const newRotation = [rotate[0] + 10, rotate[1]];
+		projectionRef.current.rotate(newRotation);
+		setRotation(newRotation);
+	};
+
+	const rotateUp = () => {
+		const rotate = projectionRef.current.rotate();
+		const newRotation = [rotate[0], rotate[1] - 10];
+		projectionRef.current.rotate(newRotation);
+		setRotation(newRotation);
+	};
+
+	const rotateDown = () => {
+		const rotate = projectionRef.current.rotate();
+		const newRotation = [rotate[0], rotate[1] + 10];
+		projectionRef.current.rotate(newRotation);
+		setRotation(newRotation);
+	};
 
 	useEffect(() => {
 		if (!countriesData) return;
@@ -39,6 +79,12 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 		pathRef.current = path;
 
 		svg.selectAll("*").remove(); // Clear previous drawings
+
+		// Dessiner les océans en bleu Klein
+		svg.append("path")
+			.datum({ type: "Sphere" })
+			.attr("d", path)
+			.attr("fill", "#002fa7");
 
 		const g = svg.append("g");
 
@@ -77,14 +123,14 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 		svg.call(zoom);
 
 		const drag = d3.drag()
+			.on("start", () => svg.interrupt())
 			.on("drag", (event) => {
 				const rotate = projection.rotate();
 				const k = 150 / projection.scale();
-				projection.rotate([rotate[0] + event.dx * k, rotate[1] - event.dy * k]);
-				requestAnimationFrame(() => {
-					countries.attr("d", path);
-				});
-				setRotation(projection.rotate());
+				const newRotation = [rotate[0] + event.dx * k, rotate[1] - event.dy * k];
+				projection.rotate(newRotation);
+				svg.selectAll("path").attr("d", path); // redraw sphere and countries
+				setRotation(newRotation);
 			});
 
 		svg.call(drag);
@@ -110,22 +156,22 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 					.attr("fill", "none");
 			}
 		}
-	}, [rotation, targetCountry, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated, countriesData]);
+	}, [rotation, targetCountry, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated, countriesData, getFillColor, onCountrySelected]);
 
-	const getFillColor = (countryName) => {
-		if (correctGuess === countryName) {
-			return isBlinking ? 'green' : 'white';
-		} else if (wrongGuess === countryName) {
-			return isBlinking ? 'red' : 'white';
-		} else if (selectedCountry === countryName) {
-			return 'yellow';
-		} else {
-			return 'white';
+	useEffect(() => {
+		if (pathRef.current) {
+			d3.select(svgRef.current).selectAll("path").attr("d", pathRef.current);
 		}
-	};
+	}, [rotation]);
 
 	return (
 		<div>
+			<div>
+				<button onClick={rotateLeft}>Rotate Left</button>
+				<button onClick={rotateRight}>Rotate Right</button>
+				<button onClick={rotateUp}>Rotate Up</button>
+				<button onClick={rotateDown}>Rotate Down</button>
+			</div>
 			<svg ref={svgRef}></svg>
 		</div>
 	);
