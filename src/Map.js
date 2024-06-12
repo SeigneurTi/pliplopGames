@@ -17,45 +17,32 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 		});
 	}, []);
 
-	const getFillColor = useCallback((countryName) => {
-		if (correctGuess === countryName) {
-			return isBlinking ? 'green' : 'white';
-		} else if (wrongGuess === countryName) {
-			return isBlinking ? 'red' : 'white';
-		} else if (selectedCountry === countryName) {
+	const getClimateColor = (latitude) => {
+		if (latitude > 60 || latitude < -60) {
+			return '#A9CCE3'; // Cold zones (Blueish)
+		} else if ((latitude > 30 && latitude < 60) || (latitude > -60 && latitude < -30)) {
+			return '#A2D9CE'; // Temperate zones (Greenish)
+		} else if ((latitude > 10 && latitude < 30) || (latitude > -30 && latitude < -10)) {
+			return '#F9E79F'; // Desert zones (Yellowish)
+		} else {
+			return '#ABEBC6'; // Tropical zones (Green)
+		}
+	};
+
+	const getFillColor = useCallback((country) => {
+		const latitude = d3.geoCentroid(country)[1]; // Get latitude of the country's centroid
+		const climateColor = getClimateColor(latitude);
+
+		if (correctGuess === country.properties.name) {
+			return isBlinking ? 'green' : climateColor;
+		} else if (wrongGuess === country.properties.name) {
+			return isBlinking ? 'red' : climateColor;
+		} else if (selectedCountry === country.properties.name) {
 			return 'yellow';
 		} else {
-			return 'white';
+			return climateColor;
 		}
 	}, [correctGuess, wrongGuess, selectedCountry, isBlinking]);
-
-	const rotateLeft = () => {
-		const rotate = projectionRef.current.rotate();
-		const newRotation = [rotate[0] - 10, rotate[1]];
-		projectionRef.current.rotate(newRotation);
-		setRotation(newRotation);
-	};
-
-	const rotateRight = () => {
-		const rotate = projectionRef.current.rotate();
-		const newRotation = [rotate[0] + 10, rotate[1]];
-		projectionRef.current.rotate(newRotation);
-		setRotation(newRotation);
-	};
-
-	const rotateUp = () => {
-		const rotate = projectionRef.current.rotate();
-		const newRotation = [rotate[0], rotate[1] - 10];
-		projectionRef.current.rotate(newRotation);
-		setRotation(newRotation);
-	};
-
-	const rotateDown = () => {
-		const rotate = projectionRef.current.rotate();
-		const newRotation = [rotate[0], rotate[1] + 10];
-		projectionRef.current.rotate(newRotation);
-		setRotation(newRotation);
-	};
 
 	useEffect(() => {
 		if (!countriesData) return;
@@ -88,12 +75,12 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 
 		const g = svg.append("g");
 
-		const countries = g.selectAll("path")
+		g.selectAll("path")
 			.data(countriesData.features)
 			.enter()
 			.append("path")
 			.attr("d", path)
-			.attr("fill", d => getFillColor(d.properties.name))
+			.attr("fill", d => getFillColor(d))
 			.attr("stroke", "black")
 			.attr("stroke-width", 0.5)
 			.on("click", (event, d) => {
@@ -108,32 +95,31 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 			})
 			.on("mouseout", (event, d) => {
 				if (!isValidated && d) { // Check if 'd' exists to avoid ocean hovers
-					d3.select(event.target).attr("fill", getFillColor(d.properties.name));
+					d3.select(event.target).attr("fill", getFillColor(d));
 				}
 			});
+
+		const drag = d3.drag()
+			.on("drag", (event) => {
+				const rotate = projection.rotate();
+				const dx = event.dx / width * 360;
+				const dy = event.dy / height * 180;
+				projection.rotate([rotate[0] + dx, rotate[1] - dy]);
+				svg.selectAll("path").attr("d", path);
+				setRotation(projection.rotate());
+			});
+
+		svg.call(drag);
 
 		const zoom = d3.zoom()
 			.scaleExtent([1, 8])
 			.on("zoom", (event) => {
 				const { transform } = event;
 				projection.scale(280 * transform.k);
-				countries.attr("d", path);
+				svg.selectAll("path").attr("d", path); // redraw sphere and countries
 			});
 
 		svg.call(zoom);
-
-		const drag = d3.drag()
-			.on("start", () => svg.interrupt())
-			.on("drag", (event) => {
-				const rotate = projection.rotate();
-				const k = 150 / projection.scale();
-				const newRotation = [rotate[0] + event.dx * k, rotate[1] - event.dy * k];
-				projection.rotate(newRotation);
-				svg.selectAll("path").attr("d", path); // redraw sphere and countries
-				setRotation(newRotation);
-			});
-
-		svg.call(drag);
 
 		// Ajouter un cercle autour du pays correct après une mauvaise réponse
 		if (wrongGuess && targetCountry) {
@@ -158,20 +144,8 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 		}
 	}, [rotation, targetCountry, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated, countriesData, getFillColor, onCountrySelected]);
 
-	useEffect(() => {
-		if (pathRef.current) {
-			d3.select(svgRef.current).selectAll("path").attr("d", pathRef.current);
-		}
-	}, [rotation]);
-
 	return (
 		<div>
-			<div>
-				<button onClick={rotateLeft}>Rotate Left</button>
-				<button onClick={rotateRight}>Rotate Right</button>
-				<button onClick={rotateUp}>Rotate Up</button>
-				<button onClick={rotateDown}>Rotate Down</button>
-			</div>
 			<svg ref={svgRef}></svg>
 		</div>
 	);
