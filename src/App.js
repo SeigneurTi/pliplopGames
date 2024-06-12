@@ -1,9 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Map from './Map';
-import countriesData from './countries.json';
 import translations from './translations.json';
-
-const countries = countriesData.features.map(feature => feature.properties.ADMIN);
 
 function App() {
   const [targetCountry, setTargetCountry] = useState('');
@@ -15,7 +12,12 @@ function App() {
   const [isValidated, setIsValidated] = useState(false);
 
   useEffect(() => {
-    setTargetCountry(countries[Math.floor(Math.random() * countries.length)]);
+    fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
+      .then(response => response.json())
+      .then(data => {
+        const countries = data.features.map(feature => feature.properties.name);
+        setTargetCountry(countries[Math.floor(Math.random() * countries.length)]);
+      });
   }, []);
 
   useEffect(() => {
@@ -32,11 +34,11 @@ function App() {
     return () => clearInterval(blinkInterval);
   }, [wrongGuess, correctGuess]);
 
-  const handleCountrySelected = (countryName) => {
+  const handleCountrySelected = useCallback((countryName) => {
     if (!isValidated) {
       setSelectedCountry(countryName);
     }
-  };
+  }, [isValidated]);
 
   const validateSelection = () => {
     if (isValidated) return;
@@ -53,7 +55,12 @@ function App() {
   };
 
   const nextCountry = () => {
-    setTargetCountry(countries[Math.floor(Math.random() * countries.length)]);
+    fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
+      .then(response => response.json())
+      .then(data => {
+        const countries = data.features.map(feature => feature.properties.name);
+        setTargetCountry(countries[Math.floor(Math.random() * countries.length)]);
+      });
     setSelectedCountry(null);
     setWrongGuess(null);
     setCorrectGuess(null);
