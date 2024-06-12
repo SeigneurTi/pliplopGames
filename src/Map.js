@@ -1,20 +1,26 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
 import countriesData from './countries.json';
 import './styles.css'; // Assurez-vous d'importer votre CSS
 
 const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated }) => {
 	const svgRef = useRef();
+	const [rotation, setRotation] = useState([0, 0, 0]);
 
 	useEffect(() => {
-		const width = 980; // Ajusté pour être légèrement plus petit que le conteneur
-		const height = 580; // Ajusté pour être légèrement plus petit que le conteneur
+		const width = 800;
+		const height = 800;
 
 		const svg = d3.select(svgRef.current)
 			.attr("width", width)
 			.attr("height", height);
 
-		const projection = d3.geoMercator().scale(150).translate([width / 2, height / 1.5]);
+		const projection = d3.geoOrthographic()
+			.scale(380)
+			.translate([width / 2, height / 2])
+			.rotate(rotation)
+			.clipAngle(90);
+
 		const path = d3.geoPath().projection(projection);
 
 		svg.selectAll("*").remove(); // Clear previous drawings
@@ -30,17 +36,17 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 			.attr("stroke", "black")
 			.attr("stroke-width", 0.5)
 			.on("click", (event, d) => {
-				if (!isValidated) {
+				if (!isValidated && d) { // Check if 'd' exists to avoid ocean clicks
 					onCountrySelected(d.properties.ADMIN);
 				}
 			})
 			.on("mouseover", (event, d) => {
-				if (!isValidated) {
+				if (!isValidated && d) { // Check if 'd' exists to avoid ocean hovers
 					d3.select(event.target).attr("fill", "lightblue");
 				}
 			})
 			.on("mouseout", (event, d) => {
-				if (!isValidated) {
+				if (!isValidated && d) { // Check if 'd' exists to avoid ocean hovers
 					d3.select(event.target).attr("fill", getFillColor(d.properties.ADMIN));
 				}
 			});
@@ -48,7 +54,9 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 		const zoom = d3.zoom()
 			.scaleExtent([1, 8])
 			.on("zoom", (event) => {
-				g.attr("transform", event.transform);
+				const { transform } = event;
+				projection.scale(380 * transform.k);
+				g.selectAll("path").attr("d", path);
 			});
 
 		svg.call(zoom);
@@ -74,7 +82,20 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 					.attr("fill", "none");
 			}
 		}
-	}, [targetCountry, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated]);
+
+		// Rotation de la carte
+		const drag = d3.drag()
+			.on("drag", (event) => {
+				const rotate = projection.rotate();
+				const k = 150 / projection.scale();
+				projection.rotate([rotate[0] + event.dx * k, rotate[1] - event.dy * k]);
+				g.selectAll("path").attr("d", path);
+				setRotation(projection.rotate());
+			});
+
+		svg.call(drag);
+
+	}, [targetCountry, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated, rotation]);
 
 	const getFillColor = (countryName) => {
 		if (correctGuess === countryName) {
@@ -89,7 +110,7 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 	};
 
 	return (
-		<div className="electric-border">
+		<div>
 			<svg ref={svgRef}></svg>
 		</div>
 	);
