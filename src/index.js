@@ -3,17 +3,16 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import {BrowserRouter, Route, Routes} from "react-router-dom";
-import WinnerPage from "./WinnerPage";
-import Generic from "./Generic";
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import WinnerPage from './WinnerPage';
+import Generic from './Generic';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <BrowserRouter>
         <Routes>
-
-            {/*<Route path="/" element={<Generic/>} />*/}
-            <Route path="/App" element={<App/>} />
+            <Route path="/" element={<Generic />} />
+            <Route path="/App" element={<App />} />
             <Route path="/winner" element={<WinnerPage />} />
         </Routes>
     </BrowserRouter>

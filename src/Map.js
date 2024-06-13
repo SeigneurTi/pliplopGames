@@ -11,7 +11,6 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
     const [countriesData, setCountriesData] = useState(null);
 
     useEffect(() => {
-        // Charger les données simplifiées des pays
         d3.json('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson').then(data => {
             setCountriesData(data);
         });
@@ -30,7 +29,7 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
     };
 
     const getFillColor = useCallback((country) => {
-        const latitude = d3.geoCentroid(country)[1]; // Get latitude of the country's centroid
+        const latitude = d3.geoCentroid(country)[1];
         const climateColor = getClimateColor(latitude);
 
         if (correctGuess === country.properties.name) {
@@ -67,7 +66,6 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 
         svg.selectAll("*").remove(); // Clear previous drawings
 
-        // Dessiner les océans en bleu Klein
         svg.append("path")
             .datum({ type: "Sphere" })
             .attr("d", path)
@@ -84,18 +82,18 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
             .attr("stroke", "black")
             .attr("stroke-width", 0.5)
             .on("click", (event, d) => {
-                if (!isValidated && d) { // Check if 'd' exists to avoid ocean clicks
+                if (!isValidated && d) {
                     onCountrySelected(d.properties.name);
                     d3.select(event.target).attr("fill", "yellow");
                 }
             })
             .on("mouseover", (event, d) => {
-                if (!isValidated && d && d.properties.name !== selectedCountry) { // Check if 'd' exists to avoid ocean hovers
+                if (!isValidated && d && d.properties.name !== selectedCountry) {
                     d3.select(event.target).attr("fill", "lightblue");
                 }
             })
             .on("mouseout", (event, d) => {
-                if (!isValidated && d && d.properties.name !== selectedCountry) { // Check if 'd' exists to avoid ocean hovers
+                if (!isValidated && d && d.properties.name !== selectedCountry) {
                     d3.select(event.target).attr("fill", getFillColor(d));
                 }
             });
@@ -118,12 +116,11 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
             .on("zoom", (event) => {
                 const { transform } = event;
                 projection.scale(280 * transform.k);
-                svg.selectAll("path").attr("d", path); // redraw sphere and countries
+                svg.selectAll("path").attr("d", path);
             });
 
         svg.call(zoom);
 
-        // Ajouter un cercle autour du pays correct après une mauvaise réponse
         if (wrongGuess && targetCountry) {
             const targetFeature = countriesData.features.find(
                 feature => feature.properties.name === targetCountry
@@ -144,7 +141,7 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
                     .attr("fill", "none");
             }
         }
-    }, [localRotation, targetCountry, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated, countriesData, getFillColor, onCountrySelected]);
+    }, [localRotation, targetCountry, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated, countriesData, getFillColor, onCountrySelected, setRotation]);
 
     return (
         <div>
