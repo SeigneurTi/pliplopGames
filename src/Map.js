@@ -1,12 +1,11 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import * as d3 from 'd3';
-import './styles.css'; // Assurez-vous d'importer votre CSS
+import './styles.css';
 
-const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated, setRotation }) => {
+const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated, setRotation, isPlaying }) => {
     const svgRef = useRef();
     const projectionRef = useRef();
     const pathRef = useRef();
-
     const [localRotation, setLocalRotation] = useState([0, 0, 0]);
     const [countriesData, setCountriesData] = useState(null);
 
@@ -18,13 +17,13 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 
     const getClimateColor = (latitude) => {
         if (latitude > 60 || latitude < -60) {
-            return '#A9CCE3'; // Cold zones (Blueish)
+            return '#A9CCE3';
         } else if ((latitude > 30 && latitude < 60) || (latitude > -60 && latitude < -30)) {
-            return '#A2D9CE'; // Temperate zones (Greenish)
+            return '#A2D9CE';
         } else if ((latitude > 10 && latitude < 30) || (latitude > -30 && latitude < -10)) {
-            return '#F9E79F'; // Desert zones (Yellowish)
+            return '#F9E79F';
         } else {
-            return '#ABEBC6'; // Tropical zones (Green)
+            return '#ABEBC6';
         }
     };
 
@@ -64,7 +63,7 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
         const path = d3.geoPath().projection(projection);
         pathRef.current = path;
 
-        svg.selectAll("*").remove(); // Clear previous drawings
+        svg.selectAll("*").remove();
 
         svg.append("path")
             .datum({ type: "Sphere" })
@@ -98,28 +97,40 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
                 }
             });
 
-        const drag = d3.drag()
-            .on("drag", (event) => {
+        if (isPlaying) {
+            const drag = d3.drag()
+                .on("drag", (event) => {
+                    const rotate = projection.rotate();
+                    const dx = event.dx / width * 360;
+                    const dy = event.dy / height * 180;
+                    projection.rotate([rotate[0] + dx, rotate[1] - dy]);
+                    svg.selectAll("path").attr("d", path);
+                    setLocalRotation(projection.rotate());
+                    setRotation(projection.rotate());
+                });
+
+            svg.call(drag);
+
+            const zoom = d3.zoom()
+                .scaleExtent([1, 8])
+                .on("zoom", (event) => {
+                    const { transform } = event;
+                    projection.scale(280 * transform.k);
+                    svg.selectAll("path").attr("d", path);
+                });
+
+            svg.call(zoom);
+        } else {
+            const rotateInterval = setInterval(() => {
                 const rotate = projection.rotate();
-                const dx = event.dx / width * 360;
-                const dy = event.dy / height * 180;
-                projection.rotate([rotate[0] + dx, rotate[1] - dy]);
+                projection.rotate([(rotate[0] + 0.1) % 360, rotate[1]]);
                 svg.selectAll("path").attr("d", path);
                 setLocalRotation(projection.rotate());
                 setRotation(projection.rotate());
-            });
+            }, );
 
-        svg.call(drag);
-
-        const zoom = d3.zoom()
-            .scaleExtent([1, 8])
-            .on("zoom", (event) => {
-                const { transform } = event;
-                projection.scale(280 * transform.k);
-                svg.selectAll("path").attr("d", path);
-            });
-
-        svg.call(zoom);
+            return () => clearInterval(rotateInterval);
+        }
 
         if (wrongGuess && targetCountry) {
             const targetFeature = countriesData.features.find(
@@ -141,7 +152,7 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
                     .attr("fill", "none");
             }
         }
-    }, [localRotation, targetCountry, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated, countriesData, getFillColor, onCountrySelected, setRotation]);
+    }, [localRotation, targetCountry, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated, countriesData, getFillColor, onCountrySelected, setRotation, isPlaying]);
 
     return (
         <div>

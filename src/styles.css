@@ -1,3 +1,114 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+.black-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 50;
+    opacity: 1;
+}
+
+.flash-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    z-index: 45;
+    opacity: 0;
+}
+
+.text-container {
+    text-align: center;
+}
+
+.text span {
+    display: inline-block;
+    opacity: 0;
+}
+
+.main {
+    z-index: 30;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    display: none;
+    /* Hide the main content until the animation is done */
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+@keyframes appear {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@font-face {
+    font-family: 'Wheri';
+    src: url('./font/WHEREIST.TTF') format('truetype');
+}
+
+.text-animation {
+    position: absolute;
+    left: 670px; /* Position to the left of the screen */
+    top: 75%;
+    transform: translateY(-50%);
+    color: #00FF00;
+    font-size: 1.5rem; /* Adjusted font size */
+    font-family: 'Wheri', monospace;
+    white-space: pre; /* Preserve whitespace for newlines */
+}
+
+.text-line {
+    display: flex;
+    margin-bottom: 0.5rem;
+}
+
+.text-line span.blink {
+    animation: blink 1s step-start infinite;
+}
+
+.text-line span.letter {
+    animation: appear 0.15s ease-in-out forwards;
+}
+
+.play-button {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #28a745;
+    color: white;
+    padding: 16px 32px;
+    font-size: 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
 .leaflet-label {
     display: none !important;
 }

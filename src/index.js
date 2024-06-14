@@ -5,13 +5,13 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import WinnerPage from './WinnerPage';
-import Generic from './Generic';
+import Introduction from './Introduction';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <BrowserRouter>
         <Routes>
-            <Route path="/" element={<Generic />} />
+            <Route path="/" element={<Introduction />} />
             <Route path="/App" element={<App />} />
             <Route path="/winner" element={<WinnerPage />} />
         </Routes>
@@ -19,6 +19,6 @@ root.render(
 );
 
 // If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
+// to log results (for example: reportWebVitals.console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
