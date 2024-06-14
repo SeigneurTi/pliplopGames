@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Introduction.css';
-import './HyperspaceAnimation.css'; // Import the new CSS
-import './HyperspaceAnimation.js'; // Import the new JS
+import JumpToHyperspace from './HyperspaceAnimation.js'; // Import the new JS
 
 const Introduction = () => {
     const navigate = useNavigate();
@@ -30,7 +29,8 @@ const Introduction = () => {
 
     useEffect(() => {
         if (phase === 'hyperspace') {
-            const myJump = new window.JumpToHyperspace();
+            const myJump = new JumpToHyperspace();
+            window.myJump = myJump; // Assign to global for reset handling
             setTimeout(() => {
                 setPhase('navigate');
                 document.body.removeChild(myJump.canvas);

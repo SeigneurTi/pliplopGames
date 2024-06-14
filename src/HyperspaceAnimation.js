@@ -232,10 +232,4 @@ class JumpToHyperspace {
         this.setup();
     };
 }
-window.JumpToHyperspace = JumpToHyperspace;
-window.addEventListener(
-    'resize',
-    _.debounce(() => {
-        window.myJump.reset();
-    }, 250)
-);
+export default JumpToHyperspace;
