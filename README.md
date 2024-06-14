@@ -10,4 +10,4 @@
 - A chaque pays à trouver, une fenêtre qui s'ouvre, un rectangle, une image d'alien sur la gauche, "capitaine nous recherchons le Pérou, pouvez-vous nous aider ?", puis on peut ferme la fenêtre. Ensuite écrire, veuillez localiser le pérou.
 - Implémenter 3 Joker.
 - Faire en sorte que l'on puisse héberger le jeu, qu'il y ait un tableau des scores.
-- Rajouter 2 autres jeux, un avec les capitales ? (ou autre) et un autre avec les monuments du monde.
+- Rajouter 2 autres jeux, un avec les capitales ? (ou autre) et un autre avec les monuments du monde (sûr) et ou sinon si pas avec capitale un truc où on peut cliquer sur un pays et avoir des infos (capitale, création, ect...).
