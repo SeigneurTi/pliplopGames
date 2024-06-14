@@ -10,9 +10,12 @@ const Introduction = () => {
     const [displayedText, setDisplayedText] = useState('');
     const [showButton, setShowButton] = useState(false);
     const [showModal, setShowModal] = useState(false);
+    const [modalText, setModalText] = useState('');
+    const [showUnderscore, setShowUnderscore] = useState(false);
     const firstLine = "EarthMap";
     const secondLine = "Game";
     const fullText = firstLine + secondLine;
+    const modalContent = `Bienvenue Jeune Terrien,\nNous avons besoin de ton aide pour cartographier les lieux.\nApparemment votre planète est constitué de plusieurs territoires appelés PAYS.\nNous avons besoin de les répertorier, c'est pourquoi nous vous avons choisi !\n\nInstructions: Le nom d'un pays sera donné, vous devez cliquer sur le territoire correspondant.\n\nBonne chance !`;
     const [phase, setPhase] = useState('intro');
     const [myJump, setMyJump] = useState(null);
 
@@ -31,6 +34,24 @@ const Introduction = () => {
 
         return () => clearInterval(interval);
     }, [fullText]);
+
+    useEffect(() => {
+        if (showModal) {
+            let index = 0;
+            const interval = setInterval(() => {
+                setModalText((prev) => prev + modalContent[index]);
+                index++;
+                if (index === modalContent.length) {
+                    clearInterval(interval);
+                    setShowUnderscore(false); // Stop the underscore at the end
+                } else {
+                    setShowUnderscore(true); // Show the underscore during typing
+                }
+            }, 50); // Each letter appears every 0.05 seconds
+
+            return () => clearInterval(interval);
+        }
+    }, [showModal, modalContent]);
 
     const startHyperspace = () => {
         setPhase('hyperspace');
@@ -82,7 +103,10 @@ const Introduction = () => {
                             <img src={alienImage} alt="Alien" className="modal-image" />
                         </div>
                         <div className="modal-body">
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                            <pre className="modal-text">
+                                {modalText}
+                                {showUnderscore && <span className="blinking-underscore">_</span>}
+                            </pre>
                         </div>
                         <div className="modal-footer">
                             <button onClick={handleContinue} className="continue-button">Continuer</button>
