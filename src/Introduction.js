@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Introduction.css';
+import './HyperspaceAnimation.css'; // Import the new CSS
+import './HyperspaceAnimation.js'; // Import the new JS
 
 const Introduction = () => {
     const navigate = useNavigate();
@@ -8,6 +10,7 @@ const Introduction = () => {
     const firstLine = "EarthMap";
     const secondLine = "Game";
     const fullText = firstLine + secondLine;
+    const [phase, setPhase] = useState('intro');
 
     useEffect(() => {
         let index = 0;
@@ -17,13 +20,30 @@ const Introduction = () => {
             if (index === fullText.length) {
                 clearInterval(interval);
                 setTimeout(() => {
-                    navigate('/App');
-                }, 4000); // Wait 4 seconds before navigating to the main application
+                    setPhase('hyperspace');
+                }, 4000); // Wait 4 seconds before starting the hyperspace animation
             }
         }, 150); // Each letter appears every 0.15 seconds
 
         return () => clearInterval(interval);
-    }, [fullText, navigate]);
+    }, [fullText]);
+
+    useEffect(() => {
+        if (phase === 'hyperspace') {
+            const myJump = new window.JumpToHyperspace();
+            setTimeout(() => {
+                setPhase('navigate');
+                document.body.removeChild(myJump.canvas);
+                myJump.renderer.domElement.remove(); // Remove the Three.js renderer
+            }, 10000); // Duration of the hyperspace animation
+        }
+    }, [phase]);
+
+    useEffect(() => {
+        if (phase === 'navigate') {
+            navigate('/app');
+        }
+    }, [phase, navigate]);
 
     const renderText = () => {
         return (
@@ -40,7 +60,8 @@ const Introduction = () => {
 
     return (
         <div className="introduction">
-            {renderText()}
+            {phase === 'intro' && renderText()}
+            {phase === 'hyperspace' && <div id="hyperspace-animation"></div>}
         </div>
     );
 };

@@ -73,13 +73,16 @@ body {
 
 .text-animation {
     position: absolute;
-    left: 670px; /* Position to the left of the screen */
+    left: 670px;
+    /* Position to the left of the screen */
     top: 75%;
     transform: translateY(-50%);
     color: #00FF00;
-    font-size: 1.5rem; /* Adjusted font size */
+    font-size: 1.5rem;
+    /* Adjusted font size */
     font-family: 'Wheri', monospace;
-    white-space: pre; /* Preserve whitespace for newlines */
+    white-space: pre;
+    /* Preserve whitespace for newlines */
 }
 
 .text-line {

@@ -4,6 +4,8 @@ import StarryBackground from './StarryBackground';
 import translations from './translations.json';
 import { useNavigate } from 'react-router-dom';
 import './styles.css';
+import './HyperspaceAnimation.css';
+import './HyperspaceAnimation.js'; // Import the new JS
 
 function App() {
   const [targetCountry, setTargetCountry] = useState('');
