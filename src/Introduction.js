@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Introduction.css';
-import JumpToHyperspace from './HyperspaceAnimation.js'; // Import the new JS
+import './HyperspaceAnimation.css';
+import JumpToHyperspace from './HyperspaceAnimation';
+import alienImage from './images/alien-talking.gif';
 
 const Introduction = () => {
     const navigate = useNavigate();
     const [displayedText, setDisplayedText] = useState('');
+    const [showButton, setShowButton] = useState(false);
+    const [showModal, setShowModal] = useState(false);
     const firstLine = "EarthMap";
     const secondLine = "Game";
     const fullText = firstLine + secondLine;
     const [phase, setPhase] = useState('intro');
+    const [myJump, setMyJump] = useState(null);
 
     useEffect(() => {
         let index = 0;
@@ -19,31 +24,32 @@ const Introduction = () => {
             if (index === fullText.length) {
                 clearInterval(interval);
                 setTimeout(() => {
-                    setPhase('hyperspace');
-                }, 4000); // Wait 4 seconds before starting the hyperspace animation
+                    setShowButton(true);
+                }, 1000); // Show button 1 second after text is fully displayed
             }
         }, 150); // Each letter appears every 0.15 seconds
 
         return () => clearInterval(interval);
     }, [fullText]);
 
-    useEffect(() => {
-        if (phase === 'hyperspace') {
-            const myJump = new JumpToHyperspace();
-            window.myJump = myJump; // Assign to global for reset handling
-            setTimeout(() => {
-                setPhase('navigate');
-                document.body.removeChild(myJump.canvas);
-                myJump.renderer.domElement.remove(); // Remove the Three.js renderer
-            }, 10000); // Duration of the hyperspace animation
-        }
-    }, [phase]);
+    const startHyperspace = () => {
+        setPhase('hyperspace');
+        const jumpInstance = new JumpToHyperspace();
+        setMyJump(jumpInstance);
+        setTimeout(() => {
+            setShowModal(true); // Show the modal at the end of the hyperspace animation
+            // Do not call cleanup here to keep the Earth visible
+        }, 10000); // Duration of the hyperspace animation
+    };
 
-    useEffect(() => {
-        if (phase === 'navigate') {
-            navigate('/app');
+    const handleContinue = () => {
+        if (myJump) {
+            myJump.cleanup(); // Ensure cleanup before navigating
         }
-    }, [phase, navigate]);
+        setPhase('navigate');
+        setShowModal(false);
+        navigate('/app');
+    };
 
     const renderText = () => {
         return (
@@ -60,8 +66,30 @@ const Introduction = () => {
 
     return (
         <div className="introduction">
-            {phase === 'intro' && renderText()}
+            {phase === 'intro' && (
+                <>
+                    {renderText()}
+                    {showButton && (
+                        <button onClick={startHyperspace} className="start-button">C'est parti !</button>
+                    )}
+                </>
+            )}
             {phase === 'hyperspace' && <div id="hyperspace-animation"></div>}
+            {showModal && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <img src={alienImage} alt="Alien" className="modal-image" />
+                        </div>
+                        <div className="modal-body">
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        </div>
+                        <div className="modal-footer">
+                            <button onClick={handleContinue} className="continue-button">Continuer</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
