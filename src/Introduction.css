@@ -3,6 +3,11 @@
     src: url('./font/WHEREIST.TTF') format('truetype');
 }
 
+@font-face {
+    font-family: 'CustomFont2';
+    src: url('./font/WHERI___.TTF') format('truetype');
+}
+
 body {
     margin: 0;
     overflow: hidden;
@@ -70,41 +75,8 @@ body {
     margin-top: 20px;
     font-size: 20px;
     color: green;
-    font-family: 'WHERL___.TTF', 'Courier New', Courier, monospace;
+    font-family: 'CustomFont2', 'Courier New', Courier, monospace;
     white-space: pre;
-}
-
-.start-button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 16px;
-    color: white;
-    background-color: #007bff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.start-button:hover {
-    background-color: #0056b3;
-}
-
-.blink {
-    animation: blink-animation 1s steps(2, start) infinite;
-    -webkit-animation: blink-animation 1s steps(2, start) infinite;
-}
-
-@keyframes blink-animation {
-    to {
-        visibility: hidden;
-    }
-}
-
-@-webkit-keyframes blink-animation {
-    to {
-        visibility: hidden;
-    }
 }
 
 .start-button {
@@ -117,7 +89,7 @@ body {
     border-radius: 5px;
     cursor: pointer;
     opacity: 0;
-    animation: fadeIn 1s forwards, blink-animation 0.5s step-end infinite alternate;
+    animation: fadeIn 1s forwards 1s, blink-animation 0.5s step-end infinite alternate;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -164,6 +136,8 @@ body {
     max-width: 80%;
     text-align: center;
     animation: fadeIn 1s forwards;
+    overflow: hidden;
+    /* Ensure text does not overflow */
 }
 
 .modal-header {
@@ -181,22 +155,74 @@ body {
 
 .modal-body {
     margin: 20px 0;
-    color: white;
-    /* White text color for contrast */
+    color: green;
+    /* Green text color */
+    text-align: left;
+    white-space: pre-wrap;
+    /* Ensure new lines are respected */
+    font-family: 'CustomFont2', 'Courier New', Courier, monospace;
+    font-size: 16px;
+    max-height: 300px;
+    /* Limit the height of the text */
+    overflow-y: auto;
+    /* Add vertical scrolling if needed */
 }
 
 .continue-button {
     margin-top: 20px;
     padding: 10px 20px;
     font-size: 16px;
-    color: white;
-    background-color: #007bff;
-    border: none;
+    color: black;
+    background-color: white;
+    border: 2px solid black;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .continue-button:hover {
-    background-color: #0056b3;
+    background-color: black;
+    color: white;
+}
+
+.blink {
+    animation: blink-animation 1s steps(2, start) infinite;
+    -webkit-animation: blink-animation 1s steps(2, start) infinite;
+}
+
+@keyframes blink-animation {
+    to {
+        visibility: hidden;
+    }
+}
+
+@-webkit-keyframes blink-animation {
+    to {
+        visibility: hidden;
+    }
+}
+
+.modal-text {
+    position: relative;
+    display: inline-block;
+}
+
+.blinking-underscore {
+    position: absolute;
+    right: -1em;
+    animation: blink 1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
