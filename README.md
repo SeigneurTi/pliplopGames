@@ -1,5 +1,6 @@
 # pliplopGames
 
+- Pour l'intro reproduire ça : https://www.youtube.com/watch?v=MGwk1h0LmFE. Il faudrait avoir aussi un bouton continuer et ensuite l'alien qui viendrait nous expliquer la mission (on peut skip si besoin). IL faut que les lettres qui s'affichent aient juste le contour et qu'on puisse voir à l'intérieur (comme sur la vidéo youtube) avec la terre en fond et les étoiles en fond aussi.
 - Faire une sorte d'intro avec un alien qui explique le jeu, qu'on est sur une planète appelée la terre, qu'on est dans le système solaire blabla ect. Inspi : https://www.youtube.com/watch?v=ODa0AufitVY.
 - Bouger de place les champs pour jouer.
 - Faire en sorte que lorsque l'on zoom la planète zoom entièrement et que l'on ait plus aucun champ jusqu'à ce qu'on dézoom au max.
