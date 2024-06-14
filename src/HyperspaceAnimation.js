@@ -1,6 +1,7 @@
 import { TweenMax, Power2 } from 'gsap';
 import _ from 'lodash';
 import * as THREE from 'three';
+import * as d3 from 'd3';
 
 const randomInRange = (max, min) =>
     Math.floor(Math.random() * (max - min + 1)) + min;
@@ -20,6 +21,18 @@ const WARP_COLORS = [
     [165, 55, 253],
     [255, 255, 255],
 ];
+
+const getClimateColor = (latitude) => {
+    if (latitude > 60 || latitude < -60) {
+        return '#A9CCE3'; // Cold zones (Blueish)
+    } else if ((latitude > 30 && latitude < 60) || (latitude > -60 && latitude < -30)) {
+        return '#A2D9CE'; // Temperate zones (Greenish)
+    } else if ((latitude > 10 && latitude < 30) || (latitude > -30 && latitude < -10)) {
+        return '#F9E79F'; // Desert zones (Yellowish)
+    } else {
+        return '#ABEBC6'; // Tropical zones (Green)
+    }
+};
 
 class Star {
     STATE = {
@@ -60,6 +73,7 @@ class JumpToHyperspace {
         bgAlpha: 0,
         sizeInc: SIZE_INC,
         velocity: VELOCITY_INC,
+        running: true // Add a flag to control animation
     };
     canvas = document.createElement('canvas');
     context = this.canvas.getContext('2d');
@@ -77,6 +91,39 @@ class JumpToHyperspace {
         setTimeout(this.animateEarth, 8000); // Start the earth animation after 8 seconds
     }
 
+    generateEarthTexture(callback) {
+        const width = 1024;
+        const height = 512;
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext('2d');
+
+        // Set background color
+        context.fillStyle = '#002fa7';
+        context.fillRect(0, 0, width, height);
+
+        const projection = d3.geoEquirectangular().scale(163).translate([width / 2, height / 2]);
+        const path = d3.geoPath(projection, context);
+
+        d3.json('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson').then(data => {
+            data.features.forEach(feature => {
+                context.beginPath();
+                path(feature);
+                const centroid = d3.geoCentroid(feature);
+                context.fillStyle = getClimateColor(centroid[1]);
+                context.fill();
+                context.strokeStyle = '#000000';
+                context.lineWidth = 0.5;
+                context.stroke();
+            });
+
+            const texture = new THREE.Texture(canvas);
+            texture.needsUpdate = true;
+            callback(texture);
+        });
+    }
+
     initThreeJS() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -88,28 +135,32 @@ class JumpToHyperspace {
         this.renderer.domElement.style.zIndex = '1000'; // Ensure it is above other elements
         document.body.appendChild(this.renderer.domElement);
 
-        const geometry = new THREE.SphereGeometry(0.1, 32, 32);
-        const material = new THREE.MeshBasicMaterial({ color: 0x0077ff });
-        this.earth = new THREE.Mesh(geometry, material);
-        this.scene.add(this.earth);
+        this.generateEarthTexture(texture => {
+            const geometry = new THREE.SphereGeometry(0.1, 32, 32);
+            const material = new THREE.MeshBasicMaterial({ map: texture });
+            this.earth = new THREE.Mesh(geometry, material);
+            this.scene.add(this.earth);
+            this.camera.position.z = 5;
 
-        this.camera.position.z = 5;
+            this.earth.visible = false; // Hide the earth initially
 
-        this.earth.visible = false; // Hide the earth initially
-
-        const animate = () => {
-            requestAnimationFrame(animate);
-            this.renderer.render(this.scene, this.camera);
-        };
-        animate();
+            const animate = () => {
+                if (this.STATE.running) {
+                    requestAnimationFrame(animate);
+                    this.renderer.render(this.scene, this.camera);
+                }
+            };
+            animate();
+        });
     }
 
     render = () => {
         const {
-            STATE: { bgAlpha, velocity, sizeInc, initiating, jumping, stars },
+            STATE: { bgAlpha, velocity, sizeInc, initiating, jumping, stars, running },
             context,
             render,
         } = this;
+        if (!running) return; // Stop rendering if the flag is false
         context.clearRect(0, 0, window.innerWidth, window.innerHeight);
         if (bgAlpha > 0) {
             context.fillStyle = `rgba(31, 58, 157, ${bgAlpha})`;
@@ -230,6 +281,22 @@ class JumpToHyperspace {
             stars: generateStarPool(300),
         };
         this.setup();
+    };
+    cleanup = () => {
+        // Cleanup the Three.js scene
+        this.STATE.running = false; // Stop the animation
+        while (this.scene.children.length > 0) {
+            this.scene.remove(this.scene.children[0]);
+        }
+        this.renderer.dispose();
+        this.renderer.forceContextLoss();
+        if (document.body.contains(this.renderer.domElement)) {
+            document.body.removeChild(this.renderer.domElement);
+        }
+        // Remove the canvas element
+        if (document.body.contains(this.canvas)) {
+            document.body.removeChild(this.canvas);
+        }
     };
 }
 export default JumpToHyperspace;
