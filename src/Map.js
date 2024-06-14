@@ -1,11 +1,12 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import * as d3 from 'd3';
-import './styles.css';
+import './styles.css'; // Assurez-vous d'importer votre CSS
 
 const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated, setRotation, isPlaying }) => {
     const svgRef = useRef();
     const projectionRef = useRef();
     const pathRef = useRef();
+
     const [localRotation, setLocalRotation] = useState([0, 0, 0]);
     const [countriesData, setCountriesData] = useState(null);
 
@@ -17,13 +18,13 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
 
     const getClimateColor = (latitude) => {
         if (latitude > 60 || latitude < -60) {
-            return '#A9CCE3';
+            return '#A9CCE3'; // Cold zones (Blueish)
         } else if ((latitude > 30 && latitude < 60) || (latitude > -60 && latitude < -30)) {
-            return '#A2D9CE';
+            return '#A2D9CE'; // Temperate zones (Greenish)
         } else if ((latitude > 10 && latitude < 30) || (latitude > -30 && latitude < -10)) {
-            return '#F9E79F';
+            return '#F9E79F'; // Desert zones (Yellowish)
         } else {
-            return '#ABEBC6';
+            return '#ABEBC6'; // Tropical zones (Green)
         }
     };
 
@@ -63,7 +64,7 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
         const path = d3.geoPath().projection(projection);
         pathRef.current = path;
 
-        svg.selectAll("*").remove();
+        svg.selectAll("*").remove(); // Clear previous drawings
 
         svg.append("path")
             .datum({ type: "Sphere" })
@@ -80,26 +81,27 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
             .attr("fill", d => getFillColor(d))
             .attr("stroke", "black")
             .attr("stroke-width", 0.5)
+            .attr("pointer-events", isPlaying ? "all" : "none") // Disable interactions if not playing
             .on("click", (event, d) => {
-                if (!isValidated && d) {
+                if (isPlaying && !isValidated && d) {
                     onCountrySelected(d.properties.name);
                     d3.select(event.target).attr("fill", "yellow");
                 }
             })
             .on("mouseover", (event, d) => {
-                if (!isValidated && d && d.properties.name !== selectedCountry) {
+                if (isPlaying && !isValidated && d && d.properties.name !== selectedCountry) {
                     d3.select(event.target).attr("fill", "lightblue");
                 }
             })
             .on("mouseout", (event, d) => {
-                if (!isValidated && d && d.properties.name !== selectedCountry) {
+                if (isPlaying && !isValidated && d && d.properties.name !== selectedCountry) {
                     d3.select(event.target).attr("fill", getFillColor(d));
                 }
             });
 
-        if (isPlaying) {
-            const drag = d3.drag()
-                .on("drag", (event) => {
+        const drag = d3.drag()
+            .on("drag", (event) => {
+                if (isPlaying) {
                     const rotate = projection.rotate();
                     const dx = event.dx / width * 360;
                     const dy = event.dy / height * 180;
@@ -107,30 +109,22 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
                     svg.selectAll("path").attr("d", path);
                     setLocalRotation(projection.rotate());
                     setRotation(projection.rotate());
-                });
+                }
+            });
 
-            svg.call(drag);
+        svg.call(drag);
 
-            const zoom = d3.zoom()
-                .scaleExtent([1, 8])
-                .on("zoom", (event) => {
+        const zoom = d3.zoom()
+            .scaleExtent([1, 8])
+            .on("zoom", (event) => {
+                if (isPlaying) {
                     const { transform } = event;
                     projection.scale(280 * transform.k);
                     svg.selectAll("path").attr("d", path);
-                });
+                }
+            });
 
-            svg.call(zoom);
-        } else {
-            const rotateInterval = setInterval(() => {
-                const rotate = projection.rotate();
-                projection.rotate([(rotate[0] + 0.1) % 360, rotate[1]]);
-                svg.selectAll("path").attr("d", path);
-                setLocalRotation(projection.rotate());
-                setRotation(projection.rotate());
-            }, );
-
-            return () => clearInterval(rotateInterval);
-        }
+        svg.call(zoom);
 
         if (wrongGuess && targetCountry) {
             const targetFeature = countriesData.features.find(
@@ -152,6 +146,20 @@ const Map = ({ targetCountry, onCountrySelected, selectedCountry, wrongGuess, co
                     .attr("fill", "none");
             }
         }
+
+        let rotateInterval;
+        if (!isPlaying) {
+            rotateInterval = setInterval(() => {
+                const rotate = projection.rotate();
+                rotate[0] += 0.1; // Adjust this value to control the rotation speed
+                projection.rotate(rotate);
+                svg.selectAll("path").attr("d", path);
+                setLocalRotation(projection.rotate());
+                setRotation(projection.rotate());
+            }, 50); // Adjust this value to control the frame rate
+        }
+
+        return () => clearInterval(rotateInterval);
     }, [localRotation, targetCountry, selectedCountry, wrongGuess, correctGuess, isBlinking, isValidated, countriesData, getFillColor, onCountrySelected, setRotation, isPlaying]);
 
     return (
