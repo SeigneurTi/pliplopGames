@@ -3,6 +3,11 @@ import Map from './Map';
 import StarryBackground from './StarryBackground';
 import translations from './translations.json';
 import { useNavigate } from 'react-router-dom';
+import './styles.css';
+import './HyperspaceAnimation.css';
+import './HyperspaceAnimation.js'; // Import the new JS
+import useSound from "use-sound";
+import remixsound from './soundtracks/Prometheus.mp3';
 
 function App() {
   const [targetCountry, setTargetCountry] = useState('');
@@ -15,6 +20,11 @@ function App() {
   const [rotation, setRotation] = useState([0, 0, 0]);
   const [correctScore, setCorrectScore] = useState(0);
   const [wrongScore, setWrongScore] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [introText, setIntroText] = useState('');
+  const [showUnderscore, setShowUnderscore] = useState(false);
+  const [play, { stop }] = useSound(remixsound, { volume: 30 });
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,6 +35,14 @@ function App() {
         setTargetCountry(countries[Math.floor(Math.random() * countries.length)]);
       });
   }, []);
+
+
+  useEffect(() => {
+    play();
+    return () => {
+      stop();
+    };
+  }, [play, stop]);
 
   useEffect(() => {
     let blinkInterval;
@@ -47,7 +65,7 @@ function App() {
   }, [isValidated]);
 
   const validateSelection = () => {
-    if (isValidated) return;
+    if (isValidated || !selectedCountry) return;  // Prevent validation if no country is selected
 
     setIsValidated(true);
 
@@ -62,6 +80,9 @@ function App() {
       setResult(`Incorrect. You selected ${selectedCountry}.`);
       setWrongScore(wrongScore + 1);
       setWrongGuess(selectedCountry);
+      if (wrongScore + 1 === 3) { // Change this to the number of wrong guesses that means game over
+        navigate('/loser');
+      }
     }
   };
 
@@ -83,23 +104,69 @@ function App() {
     return translations[countryName] || countryName;
   };
 
+  const handlePlay = () => {
+    setIsPlaying(true);
+    setRotation([-10, 0]);
+  };
+
+  useEffect(() => {
+    const fullText = "Earth 841_\nSystem 451-b";
+    let index = 0;
+    const interval = setInterval(() => {
+      setIntroText(fullText.slice(0, index));
+      index++;
+      if (index > fullText.length) {
+        clearInterval(interval);
+        setShowUnderscore(true);  // Show blinking underscore at the end
+      }
+    }, 150); // Adjust the speed here
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="flex flex-col items-center justify-center h-screen p-4">
+    <div className="flex flex-col items-center justify-center h-screen p-4 relative">
       <StarryBackground rotation={rotation} />
-      <h1 className="text-2xl font-bold mb-4 text-white">Find the Country</h1>
       <div className="w-3/4 h-3/4 mb-4 flex justify-center items-center">
-        <Map targetCountry={targetCountry} onCountrySelected={handleCountrySelected}
-          selectedCountry={selectedCountry} wrongGuess={wrongGuess} correctGuess={correctGuess}
-          isBlinking={isBlinking} isValidated={isValidated} setRotation={setRotation} />
+        <Map
+          targetCountry={targetCountry}
+          onCountrySelected={handleCountrySelected}
+          selectedCountry={selectedCountry}
+          wrongGuess={wrongGuess}
+          correctGuess={correctGuess}
+          isBlinking={isBlinking}
+          isValidated={isValidated}
+          setRotation={setRotation}
+          isPlaying={isPlaying}
+        />
       </div>
-      <div className="text-lg mb-2 text-white">Trouve le bon pays: <span className="font-bold">{getCountryNameInFrench(targetCountry)}</span></div>
-      <button className="bg-blue-500 text-white px-4 py-2 rounded mb-2" onClick={validateSelection}
-        disabled={isValidated}>Validate
-      </button>
-      <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={nextCountry}>Next Country</button>
-      <p className="mt-4 text-white">{result}</p>
-      <div className="text-lg mb-2 text-white">Correct Score: {correctScore}</div>
-      <div className="text-lg mb-2 text-white">Wrong Score: {wrongScore}</div>
+      {!isPlaying && (
+        <>
+          <div className="text-animation">
+            {introText.split('\n').map((line, index) => (
+              <div key={index} className="text-line">
+                {line}
+                {index === introText.split('\n').length - 1 && showUnderscore && <span className="blink">_</span>}
+              </div>
+            ))}
+          </div>
+          <button className="play-button" onClick={handlePlay}>
+            Play
+          </button>
+        </>
+      )}
+      {isPlaying && (
+        <>
+          <h1 className="text-2xl font-bold mb-4 text-white">Find the Country</h1>
+          <div className="text-lg mb-2 text-white">Trouve le bon pays: <span className="font-bold">{getCountryNameInFrench(targetCountry)}</span></div>
+          <button className="bg-blue-500 text-white px-4 py-2 rounded mb-2" onClick={validateSelection}
+            disabled={isValidated || !selectedCountry}>Validate
+          </button>
+          <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={nextCountry}>Next Country</button>
+          <p className="mt-4 text-white">{result}</p>
+          <div className="text-lg mb-2 text-white">Correct Score: {correctScore}</div>
+          <div className="text-lg mb-2 text-white">Wrong Score: {wrongScore}</div>
+        </>
+      )}
     </div>
   );
 }
