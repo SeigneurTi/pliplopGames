@@ -1,5 +1,7 @@
 # pliplopGames
   gif alien lose : https://giphy.com/gifs/alien-macabre-k4EpQLLFV6byo
+  font alien qui parle : https://codepen.io/JMChristensen/pen/BaMaPpo
+  animation gangé : https://codepen.io/Pomcer/pen/yvrBeP
 - Son alien : https://www.youtube.com/watch?v=sWtBE0T6eD8
 - Pour l'intro reproduire ça : https://www.youtube.com/watch?v=MGwk1h0LmFE. Il faudrait avoir aussi un bouton continuer et ensuite l'alien qui viendrait nous expliquer la mission (on peut skip si besoin). IL faut que les lettres qui s'affichent aient juste le contour et qu'on puisse voir à l'intérieur (comme sur la vidéo youtube) avec la terre en fond et les étoiles en fond aussi.
 - Faire une sorte d'intro avec un alien qui explique le jeu, qu'on est sur une planète appelée la terre, qu'on est dans le système solaire blabla ect. Inspi : https://www.youtube.com/watch?v=ODa0AufitVY.
