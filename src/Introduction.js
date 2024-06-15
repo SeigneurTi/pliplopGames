@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Introduction.css';
+import './styles.css';
 import './HyperspaceAnimation.css';
 import JumpToHyperspace from './HyperspaceAnimation';
 import alienImage from './images/alien-talking.gif';
@@ -15,7 +15,7 @@ const Introduction = () => {
     const firstLine = "EarthMap";
     const secondLine = "Game";
     const fullText = firstLine + secondLine;
-    const modalContent = `Bienvenue Jeune Terrien,\nNous avons besoin de ton aide pour cartographier les lieux.\nApparemment votre planète est constitué de plusieurs territoires appelés PAYS.\nNous avons besoin de les répertorier, c'est pourquoi nous vous avons choisi !\n\nInstructions: Le nom d'un pays sera donné, vous devez cliquer sur le territoire correspondant.\n\nBonne chance !`;
+    const modalContent = `Bienvenue jeune terrien,\nNous avons besoin de ton aide pour cartographier les lieux.\nApparemment votre "Terre" se compose de plusieurs territoires que l'on appelle pays.\nNous avons besoin de les enregistrer dans notre base de donnees, c'est pourquoi nous vous avons choisi !\n\nInstructions: Le nom d'un pays vous sera transmis, vous devez cliquer sur le territoire correspondant.\n\nBonne chance !`;
     const [phase, setPhase] = useState('intro');
     const [myJump, setMyJump] = useState(null);
 
@@ -85,6 +85,19 @@ const Introduction = () => {
         );
     };
 
+    const renderModalText = () => {
+        return (
+            <div className="modal-text">
+                {modalContent.split('\n').map((line, i) => (
+                    <div key={i} className="modal-line">
+                        {line}
+                    </div>
+                ))}
+                {showUnderscore && <span className="blinking-underscore">_</span>}
+            </div>
+        );
+    };
+
     return (
         <div className="introduction">
             {phase === 'intro' && (
@@ -99,18 +112,17 @@ const Introduction = () => {
             {showModal && (
                 <div className="modal">
                     <div className="modal-content">
-                        <div className="modal-header">
-                            <img src={alienImage} alt="Alien" className="modal-image" />
-                        </div>
+                        <span className="modal-anim"></span>
+                        <span className="modal-anim"></span>
+                        <span className="modal-anim"></span>
+                        <span className="modal-anim"></span>
+                        <img src={alienImage} alt="Alien" className="modal-image" />
                         <div className="modal-body">
-                            <pre className="modal-text">
-                                {modalText}
-                                {showUnderscore && <span className="blinking-underscore">_</span>}
-                            </pre>
+                            {renderModalText()}
                         </div>
-                        <div className="modal-footer">
-                            <button onClick={handleContinue} className="continue-button">Continuer</button>
-                        </div>
+                    </div>
+                    <div className="modal-footer">
+                        <button onClick={handleContinue} className="continue-button">Continuer</button>
                     </div>
                 </div>
             )}
