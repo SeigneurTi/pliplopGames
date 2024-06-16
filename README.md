@@ -12,5 +12,4 @@
 - Rajouter 2 autres jeux, un avec les capitales ? (ou autre) et un autre avec les monuments du monde (sûr) et ou sinon si pas avec capitale un truc où on peut cliquer sur un pays et avoir des infos (capitale, création, ect...).
 
 - Bouton recommencer ou rejouer
-- POur les monuments, si on se trompe donner le pays dans lequel se trouve le monument que l'on devait trouver.
 - FAIRE EN SORTE QUE LORSQUE L'ON TOMBE SUR UN PAYS OU MONUMENT, QUE L'ON PUISSE PLUS RETOMBER DESSUS, ENFIN QUE L'ON NOUS DEMANDE PAS UNE SECONDE FOIS DE LE CHERCHER.

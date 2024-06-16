@@ -22,7 +22,9 @@ function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [introText, setIntroText] = useState('');
   const [showUnderscore, setShowUnderscore] = useState(false);
-  const [showChoice, setShowChoice] = useState(false); // Set to false initially
+  const [showChoice, setShowChoice] = useState(false);
+  const [countryJokers, setCountryJokers] = useState(5);
+  const [monumentJokers, setMonumentJokers] = useState(2);
   const navigate = useNavigate();
   const location = useLocation();
   const gameMode = new URLSearchParams(location.search).get('mode');
@@ -64,7 +66,7 @@ function App() {
   }, [isValidated]);
 
   const validateSelection = () => {
-    if (isValidated || !selectedCountry) return;  // Prevent validation if no country is selected
+    if (isValidated || !selectedCountry) return;
 
     setIsValidated(true);
 
@@ -76,13 +78,27 @@ function App() {
         navigate('/winner');
       }
     } else {
-      setResult(`Incorrect. Vous avez choisi ${getCountryNameInFrench(selectedCountry)}. C'etait ${getCountryNameInFrench(targetCountry)}.`);
+      if (gameMode === 'monument') {
+        setResult(`Incorrect. Vous avez choisi ${translations[selectedCountry] || selectedCountry}. C'etait ${translations[targetCountry] || targetCountry}.`);
+      } else {
+        setResult(`Incorrect. Vous avez choisi ${translations[selectedCountry] || selectedCountry}.`);
+      }
       setWrongScore(wrongScore + 1);
       setWrongGuess(selectedCountry);
     }
   };
 
   const nextCountry = () => {
+    if (!selectedCountry && !isValidated) {
+      if (gameMode === 'country' && countryJokers > 0) {
+        setCountryJokers(countryJokers - 1);
+      } else if (gameMode === 'monument' && monumentJokers > 0) {
+        setMonumentJokers(monumentJokers - 1);
+      } else {
+        return;
+      }
+    }
+
     if (gameMode === 'country') {
       fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
         .then(response => response.json())
@@ -112,7 +128,7 @@ function App() {
   const handleGameChoice = (gameMode) => {
     setIsPlaying(true);
     setRotation([-10, 0]);
-    setShowChoice(false); // Hide the choice modal after selecting the game mode
+    setShowChoice(false);
     navigate(`/app?mode=${gameMode}`);
   };
 
@@ -124,9 +140,9 @@ function App() {
       index++;
       if (index > fullText.length) {
         clearInterval(interval);
-        setShowUnderscore(true);  // Show blinking underscore at the end
+        setShowUnderscore(true);
       }
-    }, 150); // Adjust the speed here
+    }, 150);
     return () => clearInterval(interval);
   }, []);
 
@@ -185,10 +201,16 @@ function App() {
           <button className="bg-blue-500 text-white px-4 py-2 rounded mb-2" onClick={validateSelection}
             disabled={isValidated || !selectedCountry}>Valider
           </button>
-          <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={nextCountry}>Suivant</button>
+          <button className={`bg-gray-500 text-white px-4 py-2 rounded ${isValidated ? 'blinking' : ''}`} onClick={nextCountry}>Suivant</button>
           <p className="mt-4 text-white">{result}</p>
           <div className="text-lg mb-2 text-white">Reponse correcte: {correctScore}</div>
-          <div className="text-lg mb-2 text-white">Mauvaise reponse: {wrongScore}</div>
+          <div className="text-lg mb-2 text-white">Score incorrect: {wrongScore}</div>
+          {gameMode === 'country' && (
+            <div className="text-lg mb-2 text-white">Jokers restants: {countryJokers}</div>
+          )}
+          {gameMode === 'monument' && (
+            <div className="text-lg mb-2 text-white">Jokers restants: {monumentJokers}</div>
+          )}
         </>
       )}
     </div>
