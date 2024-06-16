@@ -15,7 +15,7 @@ const Introduction = () => {
     const firstLine = "EarthMap";
     const secondLine = "Game";
     const fullText = firstLine + secondLine;
-    const modalContent = `Bienvenue jeune terrien,\nNous avons besoin de ton aide pour cartographier les lieux.\nApparemment votre "Terre" se compose de plusieurs territoires que l'on appelle pays.\nNous avons besoin de les enregistrer dans notre base de donnees, c'est pourquoi nous vous avons choisi !\n\nInstructions: Le nom d'un pays ou d'un monument vous sera transmis, vous devez cliquer sur le territoire correspondant.\n\nBonne chance !`;
+    const modalContent = `Bienvenue jeune terrien,\nNous avons besoin de ton aide pour cartographier les lieux.\nApparemment votre "Terre" se compose de plusieurs territoires que l'on appelle pays.\nNous avons besoin de les enregistrer dans notre base de donnees, c'est pourquoi nous vous avons choisi !\n\nInstructions: Vous devez choisir entre deux modes de jeu:\n1. Trouver le pays correspondant au nom fourni.\n2. Trouver le pays correspondant au monument fourni.\nVous devez obtenir 5 reponses correctes pour gagner.\nAttention! 5 mauvaises reponses et vous perdez.\n\nBonne chance !`;
     const [phase, setPhase] = useState('intro');
     const [myJump, setMyJump] = useState(null);
 
