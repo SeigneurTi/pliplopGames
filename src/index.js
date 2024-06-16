@@ -12,7 +12,7 @@ root.render(
     <BrowserRouter>
         <Routes>
             <Route path="/" element={<Introduction />} />
-            <Route path="/App" element={<App />} />
+            <Route path="/app" element={<App />} />
             <Route path="/winner" element={<WinnerPage />} />
         </Routes>
     </BrowserRouter>

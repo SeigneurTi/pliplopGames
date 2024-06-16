@@ -2,10 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Map from './Map';
 import StarryBackground from './StarryBackground';
 import translations from './translations.json';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './styles.css';
 import './HyperspaceAnimation.css';
 import './HyperspaceAnimation.js'; // Import the new JS
+import monuments from './monuments.json';
 
 function App() {
   const [targetCountry, setTargetCountry] = useState('');
@@ -21,16 +22,26 @@ function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [introText, setIntroText] = useState('');
   const [showUnderscore, setShowUnderscore] = useState(false);
+  const [showChoice, setShowChoice] = useState(false); // Set to false initially
   const navigate = useNavigate();
+  const location = useLocation();
+  const gameMode = new URLSearchParams(location.search).get('mode');
 
   useEffect(() => {
-    fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
-      .then(response => response.json())
-      .then(data => {
-        const countries = data.features.map(feature => feature.properties.name);
-        setTargetCountry(countries[Math.floor(Math.random() * countries.length)]);
-      });
-  }, []);
+    if (gameMode) {
+      if (gameMode === 'country') {
+        fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
+          .then(response => response.json())
+          .then(data => {
+            const countries = data.features.map(feature => feature.properties.name);
+            setTargetCountry(countries[Math.floor(Math.random() * countries.length)]);
+          });
+      } else if (gameMode === 'monument') {
+        const monument = monuments[Math.floor(Math.random() * monuments.length)];
+        setTargetCountry(monument.country);
+      }
+    }
+  }, [gameMode]);
 
   useEffect(() => {
     let blinkInterval;
@@ -72,12 +83,17 @@ function App() {
   };
 
   const nextCountry = () => {
-    fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
-      .then(response => response.json())
-      .then(data => {
-        const countries = data.features.map(feature => feature.properties.name);
-        setTargetCountry(countries[Math.floor(Math.random() * countries.length)]);
-      });
+    if (gameMode === 'country') {
+      fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson')
+        .then(response => response.json())
+        .then(data => {
+          const countries = data.features.map(feature => feature.properties.name);
+          setTargetCountry(countries[Math.floor(Math.random() * countries.length)]);
+        });
+    } else if (gameMode === 'monument') {
+      const monument = monuments[Math.floor(Math.random() * monuments.length)];
+      setTargetCountry(monument.country);
+    }
     setSelectedCountry(null);
     setWrongGuess(null);
     setCorrectGuess(null);
@@ -90,8 +106,14 @@ function App() {
   };
 
   const handlePlay = () => {
+    setShowChoice(true);
+  };
+
+  const handleGameChoice = (gameMode) => {
     setIsPlaying(true);
     setRotation([-10, 0]);
+    setShowChoice(false); // Hide the choice modal after selecting the game mode
+    navigate(`/app?mode=${gameMode}`);
   };
 
   useEffect(() => {
@@ -107,6 +129,15 @@ function App() {
     }, 150); // Adjust the speed here
     return () => clearInterval(interval);
   }, []);
+
+  const renderQuestion = () => {
+    if (gameMode === 'country') {
+      return `Trouve le bon pays: ${getCountryNameInFrench(targetCountry)}`;
+    } else if (gameMode === 'monument') {
+      const targetMonument = monuments.find(monument => monument.country === targetCountry);
+      return `Quel pays a ce monument: ${targetMonument ? targetMonument.monument : ''}`;
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen p-4 relative">
@@ -124,7 +155,7 @@ function App() {
           isPlaying={isPlaying}
         />
       </div>
-      {!isPlaying && (
+      {!isPlaying && !showChoice && (
         <>
           <div className="text-animation">
             {introText.split('\n').map((line, index) => (
@@ -139,14 +170,22 @@ function App() {
           </button>
         </>
       )}
+      {showChoice && (
+        <div className="choice-modal">
+          <div className="choice-content">
+            <button onClick={() => handleGameChoice('country')} className="choice-button">Find Country</button>
+            <button onClick={() => handleGameChoice('monument')} className="choice-button">Find Monument</button>
+          </div>
+        </div>
+      )}
       {isPlaying && (
         <>
-          <h1 className="text-2xl font-bold mb-4 text-white">Find the Country</h1>
-          <div className="text-lg mb-2 text-white">Trouve le bon pays: <span className="font-bold">{getCountryNameInFrench(targetCountry)}</span></div>
+          <h1 className="text-2xl font-bold mb-4 text-white">{gameMode === 'country' ? 'Find the Country' : 'Find the Monument'}</h1>
+          <div className="text-lg mb-2 text-white">{renderQuestion()}</div>
           <button className="bg-blue-500 text-white px-4 py-2 rounded mb-2" onClick={validateSelection}
             disabled={isValidated || !selectedCountry}>Validate
           </button>
-          <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={nextCountry}>Next Country</button>
+          <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={nextCountry}>Next</button>
           <p className="mt-4 text-white">{result}</p>
           <div className="text-lg mb-2 text-white">Correct Score: {correctScore}</div>
           <div className="text-lg mb-2 text-white">Wrong Score: {wrongScore}</div>

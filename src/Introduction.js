@@ -7,15 +7,15 @@ import alienImage from './images/alien-talking.gif';
 
 const Introduction = () => {
     const navigate = useNavigate();
-    const [displayedText, setDisplayedText] = useState('');
     const [showButton, setShowButton] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [modalText, setModalText] = useState('');
     const [showUnderscore, setShowUnderscore] = useState(false);
+    const [displayedText, setDisplayedText] = useState('');
     const firstLine = "EarthMap";
     const secondLine = "Game";
     const fullText = firstLine + secondLine;
-    const modalContent = `Bienvenue jeune terrien,\nNous avons besoin de ton aide pour cartographier les lieux.\nApparemment votre "Terre" se compose de plusieurs territoires que l'on appelle pays.\nNous avons besoin de les enregistrer dans notre base de donnees, c'est pourquoi nous vous avons choisi !\n\nInstructions: Le nom d'un pays vous sera transmis, vous devez cliquer sur le territoire correspondant.\n\nBonne chance !`;
+    const modalContent = `Bienvenue jeune terrien,\nNous avons besoin de ton aide pour cartographier les lieux.\nApparemment votre "Terre" se compose de plusieurs territoires que l'on appelle pays.\nNous avons besoin de les enregistrer dans notre base de donnees, c'est pourquoi nous vous avons choisi !\n\nInstructions: Le nom d'un pays ou d'un monument vous sera transmis, vous devez cliquer sur le territoire correspondant.\n\nBonne chance !`;
     const [phase, setPhase] = useState('intro');
     const [myJump, setMyJump] = useState(null);
 
@@ -59,7 +59,6 @@ const Introduction = () => {
         setMyJump(jumpInstance);
         setTimeout(() => {
             setShowModal(true); // Show the modal at the end of the hyperspace animation
-            // Do not call cleanup here to keep the Earth visible
         }, 10000); // Duration of the hyperspace animation
     };
 
@@ -67,9 +66,8 @@ const Introduction = () => {
         if (myJump) {
             myJump.cleanup(); // Ensure cleanup before navigating
         }
-        setPhase('navigate');
         setShowModal(false);
-        navigate('/app');
+        navigate('/app'); // Redirect to /app after the modal
     };
 
     const renderText = () => {

@@ -47,7 +47,11 @@ body {
     animation: letterAppear 0.5s forwards;
     color: white;
     text-shadow: 0 0 20px rgba(255, 255, 255, 1);
+}
+
+.styled-text {
     font-family: 'CustomFont', sans-serif;
+    /* Apply WHEREIST.TTF to letters */
 }
 
 @keyframes letterAppear {
@@ -397,4 +401,41 @@ body {
     display: inline-block;
     font-family: 'CustomFont2', 'Courier New', Courier, monospace;
     color: green;
+}
+
+.choice-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+}
+
+.choice-content {
+    background-color: black;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.choice-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: black;
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.choice-button:hover {
+    background-color: black;
+    color: white;
 }
