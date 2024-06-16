@@ -84,6 +84,9 @@ function App() {
         setResult(`Incorrect. Vous avez choisi ${translations[selectedCountry] || selectedCountry}.`);
       }
       setWrongScore(wrongScore + 1);
+      if (wrongScore + 1 === 5) {
+        navigate('/loser');
+      }
       setWrongGuess(selectedCountry);
     }
   };
@@ -196,20 +199,19 @@ function App() {
       )}
       {isPlaying && (
         <>
-          <h1 className="text-2xl font-bold mb-4 text-white">{gameMode === 'country' ? 'Trouver le pays' : 'Trouver le monument'}</h1>
+          <h1 className="text-2xl font-bold mb-4 text-white">{gameMode === 'country' ? 'Trouver le Pays' : 'Trouver le Monument'}</h1>
           <div className="text-lg mb-2 text-white">{renderQuestion()}</div>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded mb-2" onClick={validateSelection}
+          <button className={`bg-blue-500 text-white px-4 py-2 rounded mb-2 ${isValidated}`} onClick={validateSelection}
             disabled={isValidated || !selectedCountry}>Valider
           </button>
-          <button className={`bg-gray-500 text-white px-4 py-2 rounded ${isValidated ? 'blinking' : ''}`} onClick={nextCountry}>Suivant</button>
+          <button className={`bg-gray-500 text-white px-4 py-2 rounded ${isValidated && 'blinking'}`} onClick={nextCountry}>Suivant</button>
           <p className="mt-4 text-white">{result}</p>
-          <div className="text-lg mb-2 text-white">Reponse correcte: {correctScore}</div>
+          <div className="text-lg mb-2 text-white">Score correct: {correctScore}</div>
           <div className="text-lg mb-2 text-white">Score incorrect: {wrongScore}</div>
-          {gameMode === 'country' && (
-            <div className="text-lg mb-2 text-white">Jokers restants: {countryJokers}</div>
-          )}
-          {gameMode === 'monument' && (
-            <div className="text-lg mb-2 text-white">Jokers restants: {monumentJokers}</div>
+          {gameMode === 'country' ? (
+            <div className="text-lg mb-2 text-white">Jokers: {countryJokers}</div>
+          ) : (
+            <div className="text-lg mb-2 text-white">Jokers: {monumentJokers}</div>
           )}
         </>
       )}

@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import WinnerPage from './WinnerPage';
 import Introduction from './Introduction';
+import LoserPage from './LoserPage'; // Import the LoserPage component
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -14,6 +15,7 @@ root.render(
             <Route path="/" element={<Introduction />} />
             <Route path="/app" element={<App />} />
             <Route path="/winner" element={<WinnerPage />} />
+            <Route path="/loser" element={<LoserPage />} /> {/* Add this line */}
         </Routes>
     </BrowserRouter>
 );
