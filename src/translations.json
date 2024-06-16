@@ -54,7 +54,7 @@
     "Equatorial Guinea": "Guinée équatoriale",
     "Eritrea": "Érythrée",
     "Estonia": "Estonie",
-    "Eswatini (fmr. Swaziland)": "Eswatini (anciennement Swaziland)",
+    "Swaziland": "Eswatini",
     "Ethiopia": "Éthiopie",
     "Fiji": "Fidji",
     "Finland": "Finlande",
@@ -226,5 +226,6 @@
     "Sint Maarten": "Saint-Martin",
     "Turks and Caicos Islands": "Îles Turques-et-Caïques",
     "United States Virgin Islands": "Îles Vierges des États-Unis",
-    "West Bank": "Cisjordanie"
+    "West Bank": "Cisjordanie",
+    "Taiwan": "Taïwan"
 }
