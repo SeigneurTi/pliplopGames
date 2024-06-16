@@ -69,14 +69,14 @@ function App() {
     setIsValidated(true);
 
     if (selectedCountry === targetCountry) {
-      setResult('Correct! Well done.');
+      setResult('Correct! Bien joue.');
       setCorrectScore(correctScore + 1);
       setCorrectGuess(targetCountry);
       if (correctScore + 1 === 5) {
         navigate('/winner');
       }
     } else {
-      setResult(`Incorrect. You selected ${selectedCountry}.`);
+      setResult(`Incorrect. Vous avez choisi ${getCountryNameInFrench(selectedCountry)}. C'etait ${getCountryNameInFrench(targetCountry)}.`);
       setWrongScore(wrongScore + 1);
       setWrongGuess(selectedCountry);
     }
@@ -135,7 +135,7 @@ function App() {
       return `Trouve le bon pays: ${getCountryNameInFrench(targetCountry)}`;
     } else if (gameMode === 'monument') {
       const targetMonument = monuments.find(monument => monument.country === targetCountry);
-      return `Quel pays a ce monument: ${targetMonument ? targetMonument.monument : ''}`;
+      return `A quel pays appartient ce monument: ${targetMonument ? targetMonument.monument : ''}`;
     }
   };
 
@@ -166,29 +166,29 @@ function App() {
             ))}
           </div>
           <button className="play-button" onClick={handlePlay}>
-            Play
+            Jouer
           </button>
         </>
       )}
       {showChoice && (
         <div className="choice-modal">
           <div className="choice-content">
-            <button onClick={() => handleGameChoice('country')} className="choice-button">Find Country</button>
-            <button onClick={() => handleGameChoice('monument')} className="choice-button">Find Monument</button>
+            <button onClick={() => handleGameChoice('country')} className="choice-button">Trouver le pays</button>
+            <button onClick={() => handleGameChoice('monument')} className="choice-button">Trouver le monument</button>
           </div>
         </div>
       )}
       {isPlaying && (
         <>
-          <h1 className="text-2xl font-bold mb-4 text-white">{gameMode === 'country' ? 'Find the Country' : 'Find the Monument'}</h1>
+          <h1 className="text-2xl font-bold mb-4 text-white">{gameMode === 'country' ? 'Trouver le pays' : 'Trouver le monument'}</h1>
           <div className="text-lg mb-2 text-white">{renderQuestion()}</div>
           <button className="bg-blue-500 text-white px-4 py-2 rounded mb-2" onClick={validateSelection}
-            disabled={isValidated || !selectedCountry}>Validate
+            disabled={isValidated || !selectedCountry}>Valider
           </button>
-          <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={nextCountry}>Next</button>
+          <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={nextCountry}>Suivant</button>
           <p className="mt-4 text-white">{result}</p>
-          <div className="text-lg mb-2 text-white">Correct Score: {correctScore}</div>
-          <div className="text-lg mb-2 text-white">Wrong Score: {wrongScore}</div>
+          <div className="text-lg mb-2 text-white">Reponse correcte: {correctScore}</div>
+          <div className="text-lg mb-2 text-white">Mauvaise reponse: {wrongScore}</div>
         </>
       )}
     </div>
