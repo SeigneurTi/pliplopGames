@@ -330,13 +330,20 @@ body {
 }
 
 .modal-text {
-    position: relative;
-    display: inline-block;
     white-space: pre-wrap;
     /* Respecter les sauts de ligne */
     font-family: 'CustomFont2', monospace;
     word-break: break-word;
     /* Empêcher les mots d'être coupés de manière incorrecte */
+}
+
+.modal-line {
+    white-space: pre-wrap;
+    /* Respecter les sauts de ligne */
+}
+
+.whereist-font {
+    font-family: 'CustomFont', sans-serif;
 }
 
 .blinking-underscore {
@@ -460,13 +467,56 @@ body {
 
 .loser-page {
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     height: 100vh;
     background-color: black;
+    /* Ajustez la couleur de fond selon vos besoins */
 }
 
-.giphy-embed {
+.loser-content {
+    display: flex;
+    flex-direction: column;
+    /* Change to column for vertical alignment */
+    align-items: center;
+    height: 100%;
+    /* Ensure the content takes the full height */
+    width: 100%;
+    /* Ensure the content takes the full width */
+}
+
+.loser-text {
+    color: white;
+    /* Couleur du texte */
+    font-size: 2rem;
+    /* Taille du texte */
     margin-bottom: 20px;
+    /* Space between text and image */
+}
+
+.loser-image {
+    height: calc(100vh - 100px);
+    /* Take full height minus the space for text and button */
+    width: auto;
+}
+
+.loser-button {
+    margin-top: 20px;
+    /* Space between image and button */
+}
+
+.loser-button button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.loser-button button:hover {
+    background-color: #218838;
+    color: white;
 }

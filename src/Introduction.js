@@ -1,17 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './styles.css';
 import './HyperspaceAnimation.css';
 import JumpToHyperspace from './HyperspaceAnimation';
 import alienImage from './images/alien-talking.gif';
+import alienAudio from './audio/alien-talking.mp3'; // Assurez-vous d'avoir cet audio dans votre dossier audio
 
 const Introduction = () => {
     const navigate = useNavigate();
     const [showButton, setShowButton] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [modalText, setModalText] = useState('');
-    const [showUnderscore, setShowUnderscore] = useState(false);
     const [displayedText, setDisplayedText] = useState('');
+    const [introText, setIntroText] = useState('');
+    const [showUnderscore, setShowUnderscore] = useState(false);
+    const audioRef = useRef(null); // Référence pour l'audio
     const firstLine = "EarthMap";
     const secondLine = "Game";
     const fullText = firstLine + secondLine;
@@ -39,15 +42,18 @@ const Introduction = () => {
         if (showModal) {
             let index = 0;
             const interval = setInterval(() => {
-                setModalText((prev) => prev + modalContent[index]);
+                setModalText(modalContent.slice(0, index));
                 index++;
-                if (index === modalContent.length) {
+                if (index > modalContent.length) {
                     clearInterval(interval);
-                    setShowUnderscore(false); // Stop the underscore at the end
-                } else {
-                    setShowUnderscore(true); // Show the underscore during typing
+                    setShowUnderscore(true); // Show underscore after text is fully displayed
                 }
-            }, 50); // Each letter appears every 0.05 seconds
+            }, 35); // Each letter appears every 0.05 seconds
+
+            // Commencez à jouer l'audio
+            if (audioRef.current) {
+                audioRef.current.play();
+            }
 
             return () => clearInterval(interval);
         }
@@ -67,6 +73,10 @@ const Introduction = () => {
             myJump.cleanup(); // Ensure cleanup before navigating
         }
         setShowModal(false);
+        if (audioRef.current) {
+            audioRef.current.pause(); // Arrêter l'audio
+            audioRef.current.currentTime = 0; // Réinitialiser l'audio
+        }
         navigate('/app'); // Redirect to /app after the modal
     };
 
@@ -86,18 +96,22 @@ const Introduction = () => {
     const renderModalText = () => {
         return (
             <div className="modal-text">
-                {modalContent.split('\n').map((line, i) => (
+                {modalText.split('\n').map((line, i) => (
                     <div key={i} className="modal-line">
                         {line}
+                        {i === modalText.split('\n').length - 1 && showUnderscore && <span className="blink">_</span>}
                     </div>
                 ))}
-                {showUnderscore && <span className="blinking-underscore">_</span>}
             </div>
         );
     };
 
     return (
         <div className="introduction">
+            <audio ref={audioRef} loop>
+                <source src={alienAudio} type="audio/mpeg" />
+                Your browser does not support the audio element.
+            </audio>
             {phase === 'intro' && (
                 <>
                     {renderText()}

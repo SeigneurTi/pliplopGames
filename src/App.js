@@ -28,6 +28,8 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const gameMode = new URLSearchParams(location.search).get('mode');
+  const [visitedCountries, setVisitedCountries] = useState([]);
+  const [visitedMonuments, setVisitedMonuments] = useState([]);
 
   useEffect(() => {
     if (gameMode) {
@@ -36,14 +38,22 @@ function App() {
           .then(response => response.json())
           .then(data => {
             const countries = data.features.map(feature => feature.properties.name);
-            setTargetCountry(countries[Math.floor(Math.random() * countries.length)]);
+            setTargetCountry(getRandomTarget(countries, visitedCountries));
           });
       } else if (gameMode === 'monument') {
-        const monument = monuments[Math.floor(Math.random() * monuments.length)];
+        const monument = getRandomTarget(monuments, visitedMonuments);
         setTargetCountry(monument.country);
       }
     }
   }, [gameMode]);
+
+  const getRandomTarget = (list, visited) => {
+    const unvisited = list.filter(item => !visited.includes(item));
+    const target = unvisited[Math.floor(Math.random() * unvisited.length)];
+    setVisitedCountries(prev => gameMode === 'country' ? [...prev, target] : prev);
+    setVisitedMonuments(prev => gameMode === 'monument' ? [...prev, target] : prev);
+    return target;
+  };
 
   useEffect(() => {
     let blinkInterval;
@@ -107,10 +117,10 @@ function App() {
         .then(response => response.json())
         .then(data => {
           const countries = data.features.map(feature => feature.properties.name);
-          setTargetCountry(countries[Math.floor(Math.random() * countries.length)]);
+          setTargetCountry(getRandomTarget(countries, visitedCountries));
         });
     } else if (gameMode === 'monument') {
-      const monument = monuments[Math.floor(Math.random() * monuments.length)];
+      const monument = getRandomTarget(monuments, visitedMonuments);
       setTargetCountry(monument.country);
     }
     setSelectedCountry(null);
@@ -178,7 +188,7 @@ function App() {
         <>
           <div className="text-animation">
             {introText.split('\n').map((line, index) => (
-              <div key={index} className="text-line">
+              <div key={index} className="text-line whereist-font">
                 {line}
                 {index === introText.split('\n').length - 1 && showUnderscore && <span className="blink">_</span>}
               </div>
@@ -199,20 +209,24 @@ function App() {
       )}
       {isPlaying && (
         <>
-          <h1 className="text-2xl font-bold mb-4 text-white">{gameMode === 'country' ? 'Trouver le Pays' : 'Trouver le Monument'}</h1>
-          <div className="text-lg mb-2 text-white">{renderQuestion()}</div>
+          <div className="absolute top-4 left-4 text-white">
+            <h1 className="text-2xl font-bold mb-4">{gameMode === 'country' ? 'Trouver le Pays' : 'Trouver le Monument'}</h1>
+            <div className="text-lg mb-2">{renderQuestion()}</div>
+          </div>
+          <div className="absolute top-4 right-4 text-white">
+            <div className="text-lg mb-2">Score correct: {correctScore}</div>
+            <div className="text-lg mb-2">Score incorrect: {wrongScore}</div>
+            {gameMode === 'country' ? (
+              <div className="text-lg mb-2">Jokers: {countryJokers}</div>
+            ) : (
+              <div className="text-lg mb-2">Jokers: {monumentJokers}</div>
+            )}
+          </div>
           <button className={`bg-blue-500 text-white px-4 py-2 rounded mb-2 ${isValidated}`} onClick={validateSelection}
             disabled={isValidated || !selectedCountry}>Valider
           </button>
           <button className={`bg-gray-500 text-white px-4 py-2 rounded ${isValidated && 'blinking'}`} onClick={nextCountry}>Suivant</button>
           <p className="mt-4 text-white">{result}</p>
-          <div className="text-lg mb-2 text-white">Score correct: {correctScore}</div>
-          <div className="text-lg mb-2 text-white">Score incorrect: {wrongScore}</div>
-          {gameMode === 'country' ? (
-            <div className="text-lg mb-2 text-white">Jokers: {countryJokers}</div>
-          ) : (
-            <div className="text-lg mb-2 text-white">Jokers: {monumentJokers}</div>
-          )}
         </>
       )}
     </div>
